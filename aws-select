@@ -1,0 +1,63 @@
+#!/bin/bash
+#
+# Create an alias
+# alias aws-select='source <path-to>/aws-select'
+#
+# In the $CF_AWS_PROFILES directory, create <filename>.sh. Add your
+# AWS_ACCESS_KEY, AWS_SECRET_KEY, and other things that should be exported
+# when this profile is selected.
+#
+
+CF_AWS_PROFILES=$(realpath ${CF_AWS_PROFILES:=$HOME/.aws.profile.d})
+
+function __getKey
+{
+  source $1
+  echo "${AWS_ACCESS_KEY:-}"
+}
+
+function __selectAws
+{
+  if [ ! -d "${CF_AWS_PROFILES}" ]; then
+    echo "No AWS profiles found in '${CF_AWS_PROFILES}'"
+  else
+    local key
+    local -i count=0 idx
+    local -a keys files items
+
+    while read filename
+    do
+      key=$(__getKey $filename)
+      if [ -n "$key" ]; then
+        keys[$count]=$key
+        files[$count]=$filename
+        if [ "$key" == "${AWS_ACCESS_KEY:-}" ]; then
+          items[$count]="* $(basename $filename)"
+        else
+          items[$count]="  $(basename $filename)"
+        fi
+        count=$((count + 1))
+      fi
+    done <<EOF
+$(find ${CF_AWS_PROFILES} -maxdepth 1 -name "*.sh")
+EOF
+
+    local -i REPLY
+    PS3='Which AWS account? '
+    select unused in "${items[@]}"
+    do
+      if [ $REPLY -gt 0 -a $REPLY -le $count ]; then
+        idx=$((REPLY - 1))
+        if [ "${keys[$idx]}" != "${AWS_ACCESS_KEY:-}" ]; then
+          source ${files[$idx]}
+        fi
+
+        break
+      fi
+    done
+  fi
+}
+
+__selectAws
+
+unset PS3 __selectAws __getKey
