@@ -8,10 +8,8 @@ if [ -n "${BASH_VERSION:-}" ]; then
       cur="${COMP_WORDS[COMP_CWORD]}"
       COMPREPLY=()
 
-      if [ ${#COMP_WORDS[@]:-0} -gt 1 ]; then
-        names=$(awk '/^[ \t]*Host[ \t]+/ {print $2}' ~/.ssh/config  | sort | uniq)
-        COMPREPLY=( $(compgen -W "${names}" -- ${cur}) )
-      fi
+      names=$(awk '/^[ \t]*Host[ \t]+/ {print $2}' ~/.ssh/config  | sort | uniq)
+      COMPREPLY=( $(compgen -W "${names}" -- ${cur}) )
 
       return 0
   }
