@@ -9,12 +9,12 @@ if [ -n "${BASH_VERSION:-}" ]; then
       COMPREPLY=()
 
       names=$(awk '/^[ \t]*Host[ \t]+/ {print $2}' ~/.ssh/config  | sort | uniq)
-      COMPREPLY=( $(compgen -W "${names}" -- ${cur}) )
+      COMPREPLY=( $(compgen -f -W "${names}" -- ${cur}) )
 
       return 0
   }
 
-  complete -F _ssh_completion ssh
+  complete -o filenames -F _ssh_completion ssh
 
   # this statically determines the hosts
   #complete -W "$(awk '/^\s*Host\s*/ {print $2}' ~/.ssh/config  | sort | uniq)" ssh
