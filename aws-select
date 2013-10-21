@@ -50,6 +50,12 @@ EOF
         idx=$((REPLY - 1))
         if [ "${keys[$idx]}" != "${AWS_ACCESS_KEY:-}" ]; then
           source ${files[$idx]}
+
+          if [ -n "${CF_AWS_BOOTSTRAP:-}" ]; then
+            source "${CF_AWS_BOOTSTRAP}"
+          fi
+
+          unset CF_AWS_BOOTSTRAP
         fi
 
         break
