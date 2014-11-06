@@ -6,7 +6,7 @@ pattern=${1:-.*}
 
 for pid in $(pgrep -f -- "$pattern")
 do
-  prog=$(readlink -f /proc/$pid/exe)
+  prog=$(readlink -fs /proc/$pid/exe)
 
   if [ -z "$prog" ]; then
     # pids without an exe are usually kernel threads
