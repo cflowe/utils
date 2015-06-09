@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+
+set -eu
+
+key_dir='/etc/cryptsetup/keys'
+device='/dev/sdb1'
+name='u02'
+mount_point='/u02'
+
+if sudo -i /sbin/cryptsetup status "$name" | egrep -q ' is inactive' ; then
+  openssl aes-256-cbc -d < "$key_dir/${USER:-$(id -un)}.key" \
+    | sudo -i /sbin/cryptsetup open --type luks "$device" "$name"
+fi
+
+mountpoint -q "$mount_point" \
+  || sudo -i mount -t ext4 -o noatime,discard "/dev/mapper/$name" "$mount_point"
