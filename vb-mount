@@ -1,0 +1,20 @@
+#!/bin/bash
+# usage: vb-mount [options] <share-name>
+#
+# mount/remount virtualbox filesystems (vboxsf) from within a vagrant vm
+#
+# Assumes vagrant is the owner and group of all the files in the filesystem.
+#
+set -eu
+
+share_name="${@: -1:1}"
+set -- "${@:1:$#-1}"
+
+if [[ "${share_name:0:1}" != '/' ]]; then
+  share_name="/${share_name}"
+fi
+
+echo sudo -i \
+  mount -t vboxsf -o "uid=$(id -u vagrant),gid=$(id -g vagrant)" \
+  "$@" \
+  "$share_name" "$share_name"
