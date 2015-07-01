@@ -1,0 +1,34 @@
+#!/bin/bash
+#
+# Create missing loopback interfaces for use with ccm
+#
+# usage: ccm-ip-setup [node-count]
+#
+# [node-count] defaults to 3
+#
+
+set -e -o pipefail
+
+raw_value=${1:-3}
+declare -i node_count="$raw_value"
+
+set -u
+
+loopback=$(ip a sh to 127.0.0.1 | awk '-F[ :]' 'NR == 1 {print $3}')
+
+if [ $node_count -lt 0 -o $node_count -gt 254 ]; then
+  echo "Invalid node count: '$raw_value'" >&2
+  exit 1
+fi
+
+for host_id in $(seq 2 $node_count)
+do
+  ip="127.0.0.${host_id}"
+  
+  if [ -n "$(ip a sh to $ip)" ]; then
+    echo "loopback alias for $ip already exists"
+  else
+    echo "Creating loopback alias for $ip"
+    ip address add $ip dev "$loopback"
+  fi
+done
