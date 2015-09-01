@@ -5,7 +5,7 @@
 # Source this file from your .profile
 #
 # Assumes that ramdisk is defined in /etc/fstab as:
-# tmpfs /var/tmp/ccache-ram tmpfs defaults,uid=250,gid=250,size=2G,noauto 0 0
+# tmpfs /mnt/ebuild-ccache tmpfs defaults,nodev,nosuid,noexec,nodiratime,noauto,uid=250,gid=250,size=2G   0 0
 # 
 # The cache size must be at least 1G
 # The cache size is truncated to the lowest integer value in gigs
@@ -14,10 +14,12 @@
 #
 ccache_enable () 
 { 
-  local mountpoint='/var/tmp/ccache-ram'
+  local mountpoint='/mnt/ebuild-ccache'
+
   if [ "$(stat -c '%m' $mountpoint 2>/dev/null)" != "$mountpoint" ]; then
       mount "$mountpoint"
-  fi;
+  fi
+
   if [ "$(stat -c '%m' $mountpoint 2>/dev/null)" != "$mountpoint" ]; then
     echo 'No ramdisk available for ccache portage builds' >&2
     return 1
